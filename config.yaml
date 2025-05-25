@@ -1,19 +1,13 @@
 server:
-  host: "127.0.0.2"
+  host: "127.0.0.1"
   port: 8080
 
 routes:
-  - path: /api/*
-    target: http://localhost:3000
-    auth:
-      required: true
-      roles: []
+  - path: /get
+    target: https://httpbin.org
 
-  - path: /public/*
-    target: http://localhost:4000
-    auth:
-      required: false
-      roles: []
+  - path: /api/v1
+    target: https://echo.behzadan.com/
 
 logging:
   level: info

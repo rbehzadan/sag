@@ -17,6 +17,10 @@ src/config/route.rs
 src/logging/mod.rs
 src/logging/config.rs
 src/logging/console.rs
+src/server/mod.rs
+src/server/error.rs
+src/server/proxy.rs
+src/server/routes.rs
 "
 
 

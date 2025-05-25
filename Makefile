@@ -48,5 +48,6 @@ clean:
 
 cat:
 	@yes "" | head -n 10
+	tree src
+	@yes "" | head -n 2
 	@./scripts/cat_them_all.sh
-

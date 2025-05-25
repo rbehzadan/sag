@@ -1,6 +1,7 @@
 // src/main.rs
 mod config;
 mod logging;
+mod server;
 
 use anyhow::Result;
 use clap::{Arg, Command};
@@ -8,7 +9,8 @@ use std::path::PathBuf;
 #[allow(unused_imports)]
 use tracing::{debug, error, info};
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -27,6 +29,7 @@ fn main() -> Result<()> {
     let config_path_opt = matches.get_one::<PathBuf>("config");
     let mut app_config = config::load_config(config_path_opt.map(|p| p.as_ref()))?;
 
+    // Override log level if debug is enabled
     if app_config.debug {
         app_config.logging.level = "debug".to_string();
     }
@@ -43,13 +46,12 @@ fn main() -> Result<()> {
 
     if app_config.debug {
         debug!("Debug mode enabled");
-        debug!("Server config: {:?}", app_config.server);
-        for (i, route) in app_config.routes.iter().enumerate() {
-            debug!(
-                "Route {}: {} -> {} (methods: {:?})",
-                i, route.path, route.target, route.methods
-            );
-        }
+    }
+
+    // Start the server
+    if let Err(e) = server::start_server(app_config).await {
+        error!("Server failed: {}", e);
+        return Err(e);
     }
 
     Ok(())

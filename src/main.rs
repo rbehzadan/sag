@@ -26,5 +26,8 @@ fn main() -> Result<()> {
 
     println!("{:#?}", app_config);
 
+    let route1 = config::RouteConfig::default();
+    println!("{:?}", route1.methods);
+
     Ok(())
 }

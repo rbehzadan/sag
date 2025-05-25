@@ -1,3 +1,4 @@
+use crate::config::RouteConfig;
 use crate::config::ServerConfig;
 
 use serde::{Deserialize, Serialize};
@@ -6,6 +7,9 @@ use serde::{Deserialize, Serialize};
 pub struct AppConfig {
     #[serde(default)]
     pub server: ServerConfig,
+
+    #[serde(default)]
+    pub routes: Vec<RouteConfig>,
 
     #[serde(default)]
     pub debug: bool,

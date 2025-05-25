@@ -1,4 +1,18 @@
 server:
   host: "127.0.0.2"
   port: 8080
+
+routes:
+  - path: /api/*
+    target: http://localhost:3000
+    auth:
+      required: true
+      roles: []
+
+  - path: /public/*
+    target: http://localhost:4000
+    auth:
+      required: false
+      roles: []
+
 debug: true

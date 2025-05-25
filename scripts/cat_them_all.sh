@@ -12,6 +12,8 @@ src/config/mod.rs
 src/config/loader.rs
 src/config/app.rs
 src/config/server.rs
+src/config/auth.rs
+src/config/route.rs
 "
 
 

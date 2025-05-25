@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct AuthConfig {
     #[serde(default)]
     pub required: bool,
@@ -12,7 +12,7 @@ pub struct AuthConfig {
     pub auth_type: AuthType,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub enum AuthType {
     #[default]
     Bearer,

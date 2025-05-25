@@ -1,7 +1,7 @@
 use crate::config::AuthConfig;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RouteConfig {
     #[serde(default)]
     pub path: String,

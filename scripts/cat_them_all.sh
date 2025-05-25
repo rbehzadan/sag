@@ -14,8 +14,10 @@ src/config/app.rs
 src/config/server.rs
 src/config/auth.rs
 src/config/route.rs
+src/logging/mod.rs
+src/logging/config.rs
+src/logging/console.rs
 "
-
 
 
 # Function to process each file

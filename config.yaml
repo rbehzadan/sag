@@ -15,4 +15,11 @@ routes:
       required: false
       roles: []
 
+logging:
+  level: info
+  format: Compact
+  console:
+    enabled: true
+    colors: false
+
 debug: true

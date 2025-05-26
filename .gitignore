@@ -11,6 +11,17 @@ target/
 # Logs
 logs/
 
+# Python / Pytest artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.env
+.venv/
+*.egg-info/
+pip-log.txt
+
 # Archiving
 .archive/
 *_[0-9]

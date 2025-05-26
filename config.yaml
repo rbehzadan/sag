@@ -8,6 +8,36 @@ routes:
 
   - path: /api/v1
     target: https://echo.behzadan.com/
+    match_type: Prefix
+
+    # Exact matching test
+  - path: "/test/exact"
+    target: "https://gws01.lt03.behzadan.com"
+
+  # Wildcard single segment (should match /test/wildcard/abc/users)
+  - path: "/test/wildcard/*/users"
+    target: "https://gws02.lt03.behzadan.com"
+    match_type: "Wildcard"
+
+  # Wildcard multi segment (should match /test/files/anything/here/ok)
+  - path: "/test/files/**"
+    target: "https://gws03.lt03.behzadan.com"
+    match_type: "Wildcard"
+
+  # Path parameters (should match /test/users/123/posts/456)
+  - path: "/test/users/{id}/posts/{post_id}"
+    target: "https://gws04.lt03.behzadan.com"
+    match_type: "Wildcard"
+
+  # Regex (should match /test/api/v1/health, /test/api/v2/health)
+  - path: "^/test/api/v\\d+/health$"
+    target: "https://gws05.lt03.behzadan.com"
+    match_type: "Regex"
+
+  # Prefix (should match /test/legacy and /test/legacy/anything)
+  - path: "/test/legacy"
+    target: "https://gws01.lt03.behzadan.com"
+    match_type: "Prefix"
 
 logging:
   level: info

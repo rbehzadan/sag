@@ -1,0 +1,24 @@
+tests:
+  - name: "Exact match"
+    path: "/test/exact"
+    expected_tag: "gws01"
+
+  - name: "Wildcard single segment"
+    path: "/test/wildcard/foo/users"
+    expected_tag: "gws02"
+
+  - name: "Wildcard multi-segment"
+    path: "/test/files/foo/bar.txt"
+    expected_tag: "gws03"
+
+  - name: "Path parameters"
+    path: "/test/users/123/posts/456"
+    expected_tag: "gws04"
+
+  - name: "Regex match"
+    path: "/test/api/v1/health"
+    expected_tag: "gws05"
+
+  - name: "Prefix match"
+    path: "/test/legacy/oldstuff"
+    expected_tag: "gws01"

@@ -1,0 +1,103 @@
+services:
+  gws01:
+    image: ghcr.io/rbehzadan/simple-http-echo-server:0.1.8
+    container_name: gws01
+    hostname: gws01.${DOMAIN}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    environment:
+      MAX_BODY_SIZE: 4196
+      SERVER_TAG: gws01
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gws01.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gws01.rule=Host(`gws01.${DOMAIN}`)"
+      - "traefik.http.routers.gws01.middlewares=baseSecurityHeaders@file,rateLimit@file"
+
+  gws02:
+    image: ghcr.io/rbehzadan/simple-http-echo-server:0.1.8
+    container_name: gws02
+    hostname: gws02.${DOMAIN}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    environment:
+      MAX_BODY_SIZE: 4196
+      SERVER_TAG: gws02
+    depends_on:
+      - gws01
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gws02.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gws02.rule=Host(`gws02.${DOMAIN}`)"
+      - "traefik.http.routers.gws02.middlewares=baseSecurityHeaders@file,rateLimit@file"
+
+  gws03:
+    image: ghcr.io/rbehzadan/simple-http-echo-server:0.1.8
+    container_name: gws03
+    hostname: gws03.${DOMAIN}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    environment:
+      MAX_BODY_SIZE: 4196
+      SERVER_TAG: gws03
+    depends_on:
+      - gws02
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gws03.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gws03.rule=Host(`gws03.${DOMAIN}`)"
+      - "traefik.http.routers.gws03.middlewares=baseSecurityHeaders@file,rateLimit@file"
+
+  gws04:
+    image: ghcr.io/rbehzadan/simple-http-echo-server:0.1.8
+    container_name: gws04
+    hostname: gws04.${DOMAIN}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    environment:
+      MAX_BODY_SIZE: 4196
+      SERVER_TAG: gws04
+    depends_on:
+      - gws03
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gws04.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gws04.rule=Host(`gws04.${DOMAIN}`)"
+      - "traefik.http.routers.gws04.middlewares=baseSecurityHeaders@file,rateLimit@file"
+
+  gws05:
+    image: ghcr.io/rbehzadan/simple-http-echo-server:0.1.8
+    container_name: gws05
+    hostname: gws05.${DOMAIN}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik
+    environment:
+      MAX_BODY_SIZE: 4196
+      SERVER_TAG: gws05
+    depends_on:
+      - gws04
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.gws05.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gws05.rule=Host(`gws05.${DOMAIN}`)"
+      - "traefik.http.routers.gws05.middlewares=baseSecurityHeaders@file,rateLimit@file"
+
+networks:
+  traefik:
+    name: traefik
+    external: true

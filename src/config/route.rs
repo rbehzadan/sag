@@ -14,6 +14,18 @@ pub struct RouteConfig {
 
     #[serde(default)]
     pub auth: AuthConfig,
+
+    #[serde(default)]
+    pub match_type: MatchType,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub enum MatchType {
+    #[default]
+    Exact, // Exact path matching (default)
+    Wildcard, // Wildcard matching with * and **
+    Regex,    // Regex pattern matching
+    Prefix,   // Prefix matching (starts with)
 }
 
 fn default_methods() -> Vec<String> {
@@ -27,6 +39,7 @@ impl Default for RouteConfig {
             target: String::new(),
             methods: default_methods(),
             auth: AuthConfig::default(),
+            match_type: MatchType::default(),
         }
     }
 }

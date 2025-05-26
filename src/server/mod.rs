@@ -1,4 +1,5 @@
 pub mod error;
+pub mod matcher;
 pub mod proxy;
 pub mod routes;
 
@@ -8,6 +9,7 @@ use axum::{
     Router,
     routing::{any, get},
 };
+use matcher::RouteMatcher;
 use routes::{AppState, handle_request, health_check};
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
@@ -22,7 +24,7 @@ pub async fn start_server(config: AppConfig) -> Result<()> {
     // Log configured routes
     for (i, route) in config.routes.iter().enumerate() {
         info!(
-            "Route {}: {} -> {} (methods: {:?})",
+            "Route {}: {} -> {} (methods: {:?}, type: {:?})",
             i,
             if route.path.is_empty() {
                 "/"
@@ -30,13 +32,20 @@ pub async fn start_server(config: AppConfig) -> Result<()> {
                 &route.path
             },
             route.target,
-            route.methods
+            route.methods,
+            route.match_type
         );
     }
 
+    // Create route matcher
+    let matcher = RouteMatcher::new(config.routes).map_err(|e| {
+        error!("Failed to create route matcher: {}", e);
+        anyhow::anyhow!("Route matcher creation failed: {}", e)
+    })?;
+
     // Create shared state
     let state = AppState {
-        routes: config.routes,
+        matcher: Arc::new(matcher),
         proxy_client: Arc::new(proxy::ProxyClient::new()),
         debug: config.debug,
     };
@@ -65,7 +74,7 @@ pub async fn start_server(config: AppConfig) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{RouteConfig, ServerConfig};
+    use crate::config::{MatchType, RouteConfig, ServerConfig};
     use std::net::{IpAddr, Ipv4Addr};
 
     fn create_test_config() -> AppConfig {
@@ -80,6 +89,7 @@ mod tests {
                 target: "http://localhost:3000".to_string(),
                 methods: vec!["GET".to_string(), "POST".to_string()],
                 auth: Default::default(),
+                match_type: MatchType::Exact,
             }],
             logging: Default::default(),
             debug: false,

@@ -1,5 +1,9 @@
 use crate::config::RouteConfig;
-use crate::server::{error::ServerError, proxy::ProxyClient};
+use crate::server::{
+    error::ServerError,
+    matcher::{RouteMatch, RouteMatcher},
+    proxy::ProxyClient,
+};
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -11,7 +15,7 @@ use tracing::debug;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub routes: Vec<RouteConfig>,
+    pub matcher: Arc<RouteMatcher>,
     pub proxy_client: Arc<ProxyClient>,
     #[allow(dead_code)]
     pub debug: bool,
@@ -26,38 +30,27 @@ pub async fn handle_request(
 
     debug!("Incoming request: {} {}", method, path);
 
-    // Find matching route
-    let route =
-        find_matching_route(&state.routes, method, path).ok_or(ServerError::RouteNotFound)?;
+    // Find matching route using the new matcher
+    let route_match = state
+        .matcher
+        .find_match(path)
+        .ok_or(ServerError::RouteNotFound)?;
 
-    debug!("Matched route: {} -> {}", route.path, route.target);
+    // Check if method is allowed
+    if !is_method_allowed(&route_match.route.methods, method) {
+        return Err(ServerError::RouteNotFound);
+    }
 
-    // For now, we'll implement simple exact path matching
-    // Later we'll add wildcard and regex support
+    debug!(
+        "Matched route: {} -> {} (params: {:?})",
+        route_match.route.path, route_match.route.target, route_match.params
+    );
+
+    // TODO: Use route_match.params for path parameter substitution in target URL
     state
         .proxy_client
-        .proxy_request(request, &route.target)
+        .proxy_request(request, &route_match.route.target)
         .await
-}
-
-fn find_matching_route<'a>(
-    routes: &'a [RouteConfig],
-    method: &Method,
-    path: &str,
-) -> Option<&'a RouteConfig> {
-    for route in routes {
-        // Check if method is allowed
-        if !is_method_allowed(&route.methods, method) {
-            continue;
-        }
-
-        // For now, do exact path matching
-        // Later we'll implement wildcard and regex matching
-        if matches_path(&route.path, path) {
-            return Some(route);
-        }
-    }
-    None
 }
 
 fn is_method_allowed(allowed_methods: &[String], method: &Method) -> bool {
@@ -70,21 +63,6 @@ fn is_method_allowed(allowed_methods: &[String], method: &Method) -> bool {
     allowed_methods
         .iter()
         .any(|m| m.eq_ignore_ascii_case(method_str))
-}
-
-fn matches_path(route_path: &str, request_path: &str) -> bool {
-    // For now, implement exact matching
-    // Later we'll add support for:
-    // - Wildcards: /api/v1/*
-    // - Parameters: /api/v1/{id}
-    // - Regex patterns
-
-    if route_path.is_empty() {
-        // Empty route path matches root
-        return request_path == "/";
-    }
-
-    route_path == request_path
 }
 
 // Health check endpoint - not part of configured routes
@@ -107,13 +85,5 @@ mod tests {
 
         // Empty methods list should allow all
         assert!(is_method_allowed(&[], &Method::DELETE));
-    }
-
-    #[test]
-    fn test_matches_path() {
-        assert!(matches_path("/api/v1", "/api/v1"));
-        assert!(!matches_path("/api/v1", "/api/v2"));
-        assert!(matches_path("", "/"));
-        assert!(!matches_path("/api", "/api/v1"));
     }
 }
